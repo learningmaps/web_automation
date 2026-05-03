@@ -274,7 +274,7 @@ try:
             "id": None,
             "is_processed": st.column_config.CheckboxColumn("Processed", width="small"),
             "processed_on": st.column_config.DatetimeColumn("Processed On"),
-            "norm_subject": st.column_config.TextColumn("Normalized Subject", width="large"),
+            "norm_subject": st.column_config.TextColumn("Normalized Subject"),
             "meeting_id": st.column_config.TextColumn("Meeting ID"),
             "date": st.column_config.DateColumn("Date"),
             "committee_type": st.column_config.TextColumn("Committee"),
