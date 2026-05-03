@@ -318,7 +318,12 @@ try:
             worksheet.autofilter(0, 0, len(filtered_df), len(filtered_df.columns) - 1)
             for col_num, value in enumerate(filtered_df.columns.values):
                 worksheet.write(0, col_num, value, header_format)
-                width = 60 if 'subject' in value or 'text' in value or 'path' in value else 20
+                if value in ['raw_subject', 'pdf_text']:
+                    width = 60
+                elif value in ['norm_subject', 'agenda_pdf_path', 'mom_pdf_path', 'matched_keywords']:
+                    width = 40
+                else:
+                    width = 20
                 worksheet.set_column(col_num, col_num, width, cell_format)
         
         st.download_button(
