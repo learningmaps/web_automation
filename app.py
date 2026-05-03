@@ -296,6 +296,22 @@ try:
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             filtered_df.to_excel(writer, index=False, sheet_name='Consolidated')
+            workbook = writer.book
+            worksheet = writer.sheets['Consolidated']
+            
+            header_format = workbook.add_format({
+                'bold': True, 'text_wrap': False, 'valign': 'vcenter',
+                'fg_color': '#1F4E78', 'font_color': 'white', 'border': 1
+            })
+            cell_format = workbook.add_format({'valign': 'top', 'text_wrap': False, 'border': 1})
+            
+            worksheet.set_default_row(20)
+            worksheet.freeze_panes(1, 0)
+            worksheet.autofilter(0, 0, len(filtered_df), len(filtered_df.columns) - 1)
+            for col_num, value in enumerate(filtered_df.columns.values):
+                worksheet.write(0, col_num, value, header_format)
+                width = 60 if 'subject' in value or 'text' in value or 'path' in value else 20
+                worksheet.set_column(col_num, col_num, width, cell_format)
         
         st.download_button(
             label="📥 Download Consolidated Data as Excel",
