@@ -50,19 +50,22 @@ def load_consolidated_data(include_text=False):
     
     cols = [
         "id", "processed_on", "norm_subject", "meeting_id", "date", 
-        "committee_type", "meeting_start_date", "meeting_end_date", 
-        "sector_name", "statename_derived", "matched_keywords", 
-        "agenda_pdf_path", "mom_pdf_path", "is_processed", "raw_subject"
+        "committee_type", "matched_keywords", "agenda_pdf_path", "mom_pdf_path",
+        "meeting_start_date", "meeting_end_date", "sector_name", 
+        "statename_derived", "is_processed", "raw_subject"
     ]
+    
+    col_str = ", ".join([f"mv.{c}" for c in cols])
+    
     if include_text:
         query = f"""
-            SELECT mv.*, base.pdf_text 
+            SELECT {col_str}, base.pdf_text 
             FROM mv_consolidated_projects mv
             JOIN agenda_v3 base ON mv.id = base.id
             ORDER BY mv.id DESC
         """
     else:
-        query = "SELECT * FROM mv_consolidated_projects ORDER BY id DESC"
+        query = f"SELECT {', '.join(cols)} FROM mv_consolidated_projects ORDER BY id DESC"
     
     try:
         df = pd.read_sql_query(query, conn)
