@@ -320,7 +320,7 @@ try:
                 worksheet.write(0, col_num, value, header_format)
                 if value in ['raw_subject', 'pdf_text']:
                     width = 60
-                elif value in ['norm_subject', 'agenda_pdf_path', 'mom_pdf_path', 'matched_keywords']:
+                elif value in ['matched_keywords']:
                     width = 40
                 else:
                     width = 20
