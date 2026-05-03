@@ -55,9 +55,14 @@ def load_consolidated_data(include_text=False):
         "agenda_pdf_path", "mom_pdf_path", "is_processed", "raw_subject"
     ]
     if include_text:
-        cols.append("pdf_text")
-        
-    query = f"SELECT {', '.join(cols)} FROM mv_consolidated_projects ORDER BY id DESC"
+        query = f"""
+            SELECT mv.*, base.pdf_text 
+            FROM mv_consolidated_projects mv
+            JOIN agenda_v3 base ON mv.id = base.id
+            ORDER BY mv.id DESC
+        """
+    else:
+        query = "SELECT * FROM mv_consolidated_projects ORDER BY id DESC"
     
     try:
         df = pd.read_sql_query(query, conn)

@@ -78,7 +78,8 @@ class PariveshScraper:
                 meeting_id TEXT, subject TEXT, sector TEXT, selected_sector INTEGER,
                 sector_name TEXT, state TEXT, statename TEXT, statename_derived TEXT,
                 is_active INTEGER, is_deleted INTEGER, is_processed INTEGER DEFAULT 0,
-                matched_keywords TEXT, processed_on TEXT, pdf_text TEXT
+                matched_keywords TEXT, processed_on TEXT, pdf_text TEXT,
+                norm_subject TEXT
             )
         """)
         self.conn.commit()
@@ -94,6 +95,11 @@ class PariveshScraper:
         if state_code is None: return None
         try: return STATE_MAPPING.get(int(state_code))
         except: return None
+
+    def _normalize_subject(self, subject: Optional[str]) -> Optional[str]:
+        if not subject: return None
+        # Same logic as database: strip EC/AGENDA/ or EC/MOM/ (case insensitive)
+        return re.sub(r'(?i)^EC/(AGENDA|MOM)/', '', subject).strip()
 
     def fetch_for_committee(self, committee, ref_type: str) -> int:
         logger.info(f"Fetching metadata for {committee} ({ref_type})")
@@ -118,6 +124,7 @@ class PariveshScraper:
         for item in data:
             raw_path = item.get("pdfFilePath")
             code = item.get("state")
+            subj = item.get("subject")
             insert_values.append((
                 item.get("id"), self._format_date(item.get("created_on")),
                 self._format_date(item.get("updated_on")), item.get("created_by"),
@@ -126,7 +133,7 @@ class PariveshScraper:
                 urljoin(self.BASE_URL, raw_path) if raw_path else None,
                 item.get("workgroup_id"), self._format_date(item.get("meeting_start_date")),
                 self._format_date(item.get("meeting_end_date")), item.get("meeting_id"),
-                item.get("subject"), item.get("sector"), item.get("selected_sector"),
+                subj, self._normalize_subject(subj), item.get("sector"), item.get("selected_sector"),
                 item.get("sector_name"), code, item.get("stateName"),
                 self._derive_state_name(code), int(bool(item.get("is_active"))),
                 int(bool(item.get("is_deleted"))), 0, None
@@ -136,7 +143,7 @@ class PariveshScraper:
             INSERT INTO {self.table_name} (
                 id, created_on, updated_on, created_by, updated_by, vers, date, 
                 ref_id, ref_type, committee_type, pdffilepath, workgroup_id, 
-                meeting_start_date, meeting_end_date, meeting_id, subject, 
+                meeting_start_date, meeting_end_date, meeting_id, subject, norm_subject,
                 sector, selected_sector, sector_name, state, statename, statename_derived,
                 is_active, is_deleted, is_processed, processed_on
             ) VALUES %s ON CONFLICT (id) DO NOTHING
