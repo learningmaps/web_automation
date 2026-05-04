@@ -271,7 +271,7 @@ try:
         m4.metric("Keyword Matches", len(filtered_df[filtered_df['matched_keywords'].notna()]))
 
         # ─── MAIN CONSOLIDATED DATAFRAME ───
-        st.markdown(f"### Consolidated Projects ({len(filtered_df)})")
+        st.markdown(f"### Consolidated Data (Agenda + MOM) ({len(filtered_df)})")
         
         col_config = {
             "id": None,
